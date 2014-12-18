@@ -1,0 +1,14 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Commands for the VIRTIO specification document
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\definecolor{oasis1}{RGB}{85,38,129}
+\definecolor{oasis2}{RGB}{227,175,27}
+\definecolor{shadecolor}{RGB}{230,230,230}
+
+% How we format a field name
+\newcommand{\field}[1]{\emph{#1}}
+
+% Mark a normative section (driver or device)
+\newcommand{\drivernormative}[3]{#1{Driver Requirements: #2}\label{drivernormative:#3}}
+\newcommand{\devicenormative}[3]{#1{Device Requirements: #2}\label{devicenormative:#3}}
