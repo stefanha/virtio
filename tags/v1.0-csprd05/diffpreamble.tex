@@ -1,0 +1,42 @@
+%% diffpreable.tex start
+
+%DIF FONTSTRIKE PREAMBLE
+\RequirePackage[normalem]{ulem}
+\providecommand{\DIFadd}[1]{\protect\textcolor{green}{\sf #1}}
+\providecommand{\DIFdel}[1]{\protect\textcolor{red}{\footnotesize \sout{#1}}}
+%DIF END FONTSTRIKE PREAMBLE
+
+%DIF COLOR PREAMBLE
+\RequirePackage{color}
+\providecommand{\DIFaddbegin}{\protect\color{green}\hypersetup{linkcolor=green,urlcolor=green}}
+\providecommand{\DIFaddend}{\protect\color{black}\hypersetup{linkcolor=blue,urlcolor=blue}}
+\providecommand{\DIFdelbegin}{\protect\color{red}\hypersetup{linkcolor=red,urlcolor=red}}
+\providecommand{\DIFdelend}{\protect\color{black}\hypersetup{linkcolor=blue,urlcolor=blue}}
+\providecommand{\DIFaddtext}[1]{\textcolor{blue}{\sf #1}}
+\providecommand{\DIFdeltext}[1]{\textcolor{red}{\footnotesize \sout{#1}}}
+
+%DIF END COLOR PREAMBLE
+\providecommand{\DIFaddtext}[1]{\textcolor{green}{\sf #1}}
+\providecommand{\DIFdeltext}[1]{\textcolor{red}{\footnotesize \sout{#1}}}
+
+%manual markup for cs02
+\renewcommand{\DIFaddtextcstwo}[1]{\textcolor{green}{\sf #1}}
+\renewcommand{\DIFdeltextcstwo}[1]{\textcolor{red}{\footnotesize \sout{#1}}}
+
+%DIF FLOATSAFE PREAMBLE: SEEMS UNUSED BUT JUST IN CASE
+\providecommand{\DIFaddFL}[1]{\DIFadd{#1}}
+\providecommand{\DIFdelFL}[1]{\DIFdel{#1}}
+\providecommand{\DIFaddbeginFL}{}
+\providecommand{\DIFaddendFL}{}
+\providecommand{\DIFdelbeginFL}{}
+\providecommand{\DIFdelendFL}{}
+\renewenvironment{DIFnomarkup}
+{
+\begingroup\color{black}\hypersetup{linkcolor=blue,urlcolor=blue}
+}
+{
+\endgroup
+}
+%DIF END FLOATSAFE PREAMBLE
+
+%% diffpreable.tex end
