@@ -423,7 +423,7 @@ href="#x1-2690005" id="QQ2-1-271">Device Requirements: Device Initialization</a>
 <br />  <span class="subsectionToc" >5.6.6 <a 
 href="#x1-2700006" id="QQ2-1-272">Device Operation</a></span>
 <br /> <span class="sectionToc" >5.7 <a 
-href="#x1-2830007" id="QQ2-1-285">Vhost-user Slave Device</a></span>
+href="#x1-2830007" id="QQ2-1-285">Vhost-user Device Backend</a></span>
 <br />  <span class="subsectionToc" >5.7.1 <a 
 href="#x1-2840001" id="QQ2-1-286">Device ID</a></span>
 <br />  <span class="subsectionToc" >5.7.2 <a 
@@ -7802,7 +7802,7 @@ class="hline"><td><hr></td><td><hr></td></tr><tr class="row-21"><td style="text-
 </tr><tr 
 class="hline"><td><hr></td><td><hr></td></tr><tr class="row-22"><td style="text-align: left; min-width: 0.2\textwidth ; border-left-style:solid; border-right-style:solid; border-width:thin; padding-left:6pt; padding-right:6pt;" > 22            </td><td style="text-align: left; min-width: 0.7\textwidth ; border-left-style:solid; border-right-style:solid; border-width:thin; padding-left:6pt; padding-right:6pt;" >         pstore device              </td>
 </tr><tr 
-class="hline"><td><hr></td><td><hr></td></tr><tr class="row-23"><td style="text-align: left; min-width: 0.2\textwidth ; border-left-style:solid; border-right-style:solid; border-width:thin; padding-left:6pt; padding-right:6pt;" > 24            </td><td style="text-align: left; min-width: 0.7\textwidth ; border-left-style:solid; border-right-style:solid; border-width:thin; padding-left:6pt; padding-right:6pt;" >     vhost-user slave device        </td></tr><tr 
+class="hline"><td><hr></td><td><hr></td></tr><tr class="row-23"><td style="text-align: left; min-width: 0.2\textwidth ; border-left-style:solid; border-right-style:solid; border-width:thin; padding-left:6pt; padding-right:6pt;" > 24            </td><td style="text-align: left; min-width: 0.7\textwidth ; border-left-style:solid; border-right-style:solid; border-width:thin; padding-left:6pt; padding-right:6pt;" >    vhost-user device backend      </td></tr><tr 
 class="hline"><td><hr></td><td><hr></td></tr><tr class="row-24"><td style="text-align: left; min-width: 0.2\textwidth ; border-left-style:solid; border-right-style:solid; border-width:thin; padding-left:6pt; padding-right:6pt;" ></td>
 </tr></table></div>
 <!--l. 3029--><p class="noindent" >Some of the devices above are unspecified by this document, because they are seen as
@@ -14755,8 +14755,8 @@ class="aeti-10">sense </span>fields.
 <a 
  id="x1-282001r263"></a>
 <h3 class="sectionHead"><span class="titlemark">5.7   </span> <a 
- id="x1-2830007"></a>Vhost-user Slave Device</h3>
-<!--l. 5826--><p class="nopar" >The vhost-user slave device facilitates vhost-user device emulation through
+ id="x1-2830007"></a>Vhost-user Device Backend</h3>
+<!--l. 5826--><p class="nopar" >The vhost-user device backend facilitates vhost-user device emulation through
 vhost-user protocol exchanges and access to shared memory. Software-defined
 networking, storage, and other I/O appliances can provide services through this
 device.
@@ -14764,9 +14764,9 @@ device.
 href="#x1-3001r1">Vhost-user Protocol</a>. Knowledge of the
 vhost-user protocol is a prerequisite for understanding this device.
 <!--l. 5835--><p class="noindent" >The <a 
-href="#x1-3001r1">Vhost-user Protocol</a> was originally designed for processes on a single
-system communicating over UNIX domain sockets. The vhost-user slave
-device allows the vhost-user slave to communicate with the vhost-user master
+href="#x1-3001r1">Vhost-user Protocol</a> was originally designed for processes on a single system
+communicating over UNIX domain sockets. The virtio vhost-user device
+backend allows the vhost-user slave to communicate with the vhost-user master
 over the device instead of a UNIX domain socket. This allows the slave and
 master to run on two separate systems such as a virtual machine and a
 hypervisor.
@@ -14777,10 +14777,10 @@ hypervisor.
 vhost-user master through this device. How the device implementation communicates
 with the vhost-user master is beyond the scope of this specification. One possible
 device implementation uses a UNIX domain socket to relay messages to a vhost-user
-master process.
+master process running on the same host.
 <!--l. 5848--><p class="noindent" >Existing vhost-user slave programs that communicate over UNIX domain sockets can
-support the vhost-user slave device interface without invasive changes because the
-same vhost-user wire protocol is used.
+support the virtio vhost-user device backend without invasive changes because the
+pre-existing vhost-user wire protocol is used.
 <a 
  id="x1-283001r272"></a>
 <h4 class="subsectionHead"><span class="titlemark">5.7.1   </span> <a 
@@ -14793,35 +14793,27 @@ same vhost-user wire protocol is used.
     <dl class="description"><dt class="description">
 <span 
 class="aebx-10">0</span> </dt><dd 
-class="description">m2srxq (requests from vhost-user master)
+class="description">rxq (device-to-driver vhost-user protocol messages)
     </dd><dt class="description">
 <span 
 class="aebx-10">1</span> </dt><dd 
-class="description">m2stxq (responses to vhost-user master)
-    </dd><dt class="description">
-<span 
-class="aebx-10">2</span> </dt><dd 
-class="description">s2mrxq (responses from vhost-user master)
-    </dd><dt class="description">
-<span 
-class="aebx-10">3</span> </dt><dd 
-class="description">s2mtxq (requests to vhost-user master)</dd></dl>
+class="description">txq (driver-to-device vhost-user protocol messages)</dd></dl>
 <a 
  id="x1-285001r287"></a>
 <h4 class="subsectionHead"><span class="titlemark">5.7.3   </span> <a 
  id="x1-2860003"></a>Feature bits</h4>
-<!--l. 5866--><p class="nopar" >No feature bits are defined at this time.
+<!--l. 5864--><p class="nopar" >No feature bits are defined at this time.
 <a 
  id="x1-286001r288"></a>
 <h4 class="subsectionHead"><span class="titlemark">5.7.4   </span> <a 
  id="x1-2870004"></a>Device configuration layout</h4>
-<!--l. 5870--><p class="nopar" >All fields of this configuration are always available.
-<!--l. 5872-->
+<!--l. 5868--><p class="nopar" >All fields of this configuration are always available.
+<!--l. 5870-->
 <div class="lstlisting" id="listing-63"><span class="label"><a 
  id="x1-287001r1"></a></span><span 
 class="pcrr8t-x-x-80">struct</span><span 
 class="pcrr8t-x-x-80"> </span><span 
-class="pcrr8t-x-x-80">virtio_vhostslave_config</span><span 
+class="pcrr8t-x-x-80">virtio_vhost_user_config</span><span 
 class="pcrr8t-x-x-80"> </span><span 
 class="pcrr8t-x-x-80">{</span><span 
 class="pcrr8t-x-x-80"> </span><br /><span class="label"><a 
@@ -14843,7 +14835,7 @@ class="pcrr8t-x-x-80"> </span><br /><span class="label"><a
 class="pcrr8t-x-x-80">#</span><span 
 class="pcrr8t-x-x-80">define</span><span 
 class="pcrr8t-x-x-80"> </span><span 
-class="pcrr8t-x-x-80">VIRTIO_VHOSTSLAVE_STATUS_SLAVE_UP</span><span 
+class="pcrr8t-x-x-80">VIRTIO_VHOST_USER_STATUS_SLAVE_UP</span><span 
 class="pcrr8t-x-x-80"> </span><span 
 class="pcrr8t-x-x-80">0</span><span 
 class="pcrr8t-x-x-80"> </span><br /><span class="label"><a 
@@ -14851,7 +14843,7 @@ class="pcrr8t-x-x-80"> </span><br /><span class="label"><a
 class="pcrr8t-x-x-80">#</span><span 
 class="pcrr8t-x-x-80">define</span><span 
 class="pcrr8t-x-x-80"> </span><span 
-class="pcrr8t-x-x-80">VIRTIO_VHOSTSLAVE_STATUS_MASTER_UP</span><span 
+class="pcrr8t-x-x-80">VIRTIO_VHOST_USER_STATUS_MASTER_UP</span><span 
 class="pcrr8t-x-x-80"> </span><span 
 class="pcrr8t-x-x-80">1</span><span 
 class="pcrr8t-x-x-80"> </span><br /><span class="label"><a 
@@ -14891,21 +14883,21 @@ class="pcrr8t-x-x-80">};</span>
 class="aebxti-10">status</span> </dt><dd 
 class="description">contains the vhost-user operational status. The default value of this field
     is 0.
+    <!--l. 5884--><p class="noindent" >The driver sets VIRTIO_VHOST_USER_STATUS_SLAVE_UP to indicate
+    readiness  for  the  vhost-user  master  to  connect.  The  vhost-user  master
+    cannot connect unless the driver has set this bit first.
+    <!--l. 5888--><p class="noindent" >When  the  driver  clears  VIRTIO_VHOST_USER_SLAVE_UP  while  the
+    vhost-user master is connected, the vhost-user master is disconnected.
                                                                   
 
                                                                   
-    <!--l. 5886--><p class="noindent" >The driver sets VIRTIO_VHOSTSLAVE_STATUS_SLAVE_UP to indicate
-    readiness  for  the  vhost-user  master  to  connect.  The  vhost-user  master
-    cannot connect unless the driver has set this bit first.
-    <!--l. 5890--><p class="noindent" >When  the  driver  clears  VIRTIO_VHOSTSLAVE_SLAVE_UP  while  the
-    vhost-user master is connected, the vhost-user master is disconnected.
-    <!--l. 5893--><p class="noindent" >When                                    the                                    vhost-user
-    master  disconnects,  both  VIRTIO_VHOSTSLAVE_STATUS_SLAVE_UP
-    and   VIRTIO_VHOSTSLAVE_STATUS_MASTER_UP   are   cleared   by
+    <!--l. 5891--><p class="noindent" >When                                    the                                    vhost-user
+    master  disconnects,  both  VIRTIO_VHOST_USER_STATUS_SLAVE_UP
+    and   VIRTIO_VHOST_USER_STATUS_MASTER_UP   are   cleared   by
     the  device.  Communication  can  be  restarted  by  the  driver  setting
-    VIRTIO_VHOSTSLAVE_STATUS_SLAVE_UP again.
-    <!--l. 5898--><p class="noindent" >A configuration change notification is sent when the device changes this
-    field idendependently of a driver write.
+    VIRTIO_VHOST_USER_STATUS_SLAVE_UP again.
+    <!--l. 5896--><p class="noindent" >A configuration change notification is sent when the device changes this
+    field unless a write to the field by the driver caused the change.
     </dd><dt class="description">
 <span 
 class="aebxti-10">max_vhost_queues</span> </dt><dd 
@@ -14916,71 +14908,75 @@ class="description">is the maximum number of vhost-user queues supported
 class="aebxti-10">uuid</span> </dt><dd 
 class="description">is the Universally Unique Identifier (UUID) for this device. If the device
     has no UUID then this field contains the nil UUID (all zeroes). The UUID
-    allows  vhost-user  slave  programs  to  identify  a  specific  vhost-user  slave
-    device among many without relying on bus addresses.</dd></dl>
+    allows vhost-user slave programs to identify a specific vhost-user device
+    backend among many without relying on bus addresses.</dd></dl>
 <a 
  id="x1-287008r284"></a>
 <h5 class="subsubsectionHead"><span class="titlemark">5.7.4.1   </span> <a 
  id="x1-2880001"></a>Driver Requirements: Device configuration layout</h5>
-<!--l. 5913--><p class="nopar" >The driver MUST NOT write to device configuration fields other than <span 
+<!--l. 5911--><p class="nopar" >The driver MUST NOT write to device configuration fields other than <span 
 class="aeti-10">status</span>.
-<!--l. 5916--><p class="noindent" >The driver MUST NOT set undefined bits in the <span 
+<!--l. 5914--><p class="noindent" >The driver MUST NOT set undefined bits in the <span 
 class="aeti-10">status </span>configuration field.
 <a 
  id="x1-288001r289"></a>
 <h4 class="subsectionHead"><span class="titlemark">5.7.5   </span> <a 
  id="x1-2890005"></a>Device Requirements: Device Initialization</h4>
-<!--l. 5920--><p class="nopar" >The driver SHOULD check the <span 
+<!--l. 5918--><p class="nopar" >The driver SHOULD check the <span 
 class="aeti-10">max_vhost_queues </span>configuration field to determine
 how many queues the vhost-user slave will be able to support.
-<!--l. 5923--><p class="noindent" >The driver SHOULD fetch the <span 
+<!--l. 5921--><p class="noindent" >The driver SHOULD fetch the <span 
 class="aeti-10">uuid </span>configuration field to allow vhost-user slave
 programs to identify a specific device among many.
-<!--l. 5926--><p class="noindent" >The driver SHOULD initialize the s2mrxq and s2mtxq virtqueues. These virtqueues
-used if the VHOST_USER_PROTOCOL_F_SLAVE_REQ vhost-user protocol feature
-is negotiated.
-<!--l. 5930--><p class="noindent" >The driver SHOULD place at least one buffer in m2srxq before setting the
-VIRTIO_VHOSTSLAVE_SLAVE_UP bit in the <span 
+<!--l. 5924--><p class="noindent" >The driver SHOULD place at least one buffer in rxq before setting the
+VIRTIO_VHOST_USER_SLAVE_UP bit in the <span 
 class="aeti-10">status </span>configuration field.
-<!--l. 5933--><p class="noindent" >The driver MUST handle m2srxq virtqueue notifications that occur before the
+<!--l. 5927--><p class="noindent" >The driver MUST handle rxq virtqueue notifications that occur before the
 configuration change notification. It is possible that a vhost-user protocol message
-                                                                  
-
-                                                                  
 from the vhost-user master arrives before the driver has seen the configuration
-change notification for the VIRTIO_VHOSTSLAVE_STATUS_MASTER_UP <span 
+change notification for the VIRTIO_VHOST_USER_STATUS_MASTER_UP <span 
 class="aeti-10">status</span>
 change.
 <a 
  id="x1-289001r291"></a>
 <h4 class="subsectionHead"><span class="titlemark">5.7.6   </span> <a 
  id="x1-2900006"></a>Device Operation</h4>
-<!--l. 5941--><p class="nopar" >Device operation consists of operating request queues and response queues.
+<!--l. 5935--><p class="nopar" >Device operation consists of operating request queues and response queues.
 <a 
  id="x1-290001r290"></a>
+                                                                  
+
+                                                                  
 <h5 class="subsubsectionHead"><span class="titlemark">5.7.6.1   </span> <a 
  id="x1-2910001"></a>Device Operation: Request Queues</h5>
-<!--l. 5945--><p class="nopar" >The driver receives vhost-user protocol messages from the vhost-user master on
-m2srxq. The driver sends responses to the vhost-user master on m2stxq.
-<!--l. 5948--><p class="noindent" >The driver sends slave-initiated requests on s2mtxq. The driver receives responses
-from the vhost-user master on s2mrxq.
-<!--l. 5951--><p class="noindent" >All virtqueues offer in-order guaranteed delivery semantics for vhost-user protocol
+<!--l. 5939--><p class="nopar" >The driver receives vhost-user protocol messages from the vhost-user master on rxq.
+The driver sends responses to the vhost-user master on txq.
+<!--l. 5942--><p class="noindent" >The driver sends slave-initiated requests on txq. The driver receives responses from
+the vhost-user master on rxq.
+<!--l. 5945--><p class="noindent" >All virtqueues offer in-order guaranteed delivery semantics for vhost-user protocol
 messages.
-<!--l. 5954--><p class="noindent" >Each buffer is a vhost-user protocol message as defined by the <a 
+<!--l. 5948--><p class="noindent" >Each buffer is a vhost-user protocol message as defined by the <a 
 href="#x1-3001r1">Vhost-user Protocol</a>.
-File descriptor passing is handled differently by the vhost-user slave device. When a
-message is received that carries one or more file descriptors according to the
+In order to enable cross-endian communication, all message fields are little-endian
+instead of the native byte order normally used by the protocol.
+<!--l. 5953--><p class="noindent" >The appropriate size of rxq buffers is at least as large as the largest message defined
+by the <a 
+href="#x1-3001r1">Vhost-user Protocol</a> standard version that the driver supports. If the
+vhost-user master sends a message that is too large for an rxq buffer then
+DEVICE_NEEDS_RESET is set and the driver must reset the device.
+<!--l. 5959--><p class="noindent" >File descriptor passing is handled differently by the vhost-user device backend. When
+a message is received that carries one or more file descriptors according to the
 vhost-user protocol, additional device resources become available to the
 driver.
 <a 
  id="x1-291001r292"></a>
 <h4 class="subsectionHead"><span class="titlemark">5.7.7   </span> <a 
  id="x1-2920007"></a>Additional Device Resources over PCI</h4>
-<!--l. 5963--><p class="nopar" >The vhost-user slave device contains additional device resources beyond configuration
-space and virtqueues. The nature of these resources is transport-specific and therefore
-only virtio transports that provide these resources support the vhost-user slave
-device.
-<!--l. 5968--><p class="noindent" >The following additional resources exist:
+<!--l. 5966--><p class="nopar" >The vhost-user device backend contains additional device resources beyond
+configuration space and virtqueues. The nature of these resources is transport-specific
+and therefore only virtio transports that provide these resources support the
+vhost-user device backend.
+<!--l. 5971--><p class="noindent" >The following additional resources exist:
     <dl class="description"><dt class="description">
 <span 
 class="aebx-10">Doorbells</span> </dt><dd 
@@ -14998,12 +14994,12 @@ class="description">The vhost-user master gives access to memory that can be
     mapped by the driver.</dd></dl>
 <a 
  id="x1-292001r293"></a>
+<h5 class="subsubsectionHead"><span class="titlemark">5.7.7.1   </span> <a 
+ id="x1-2930001"></a>Doorbell Numbering</h5>
+<!--l. 5980--><p class="nopar" >Doorbells are laid out as follows:
                                                                   
 
                                                                   
-<h5 class="subsubsectionHead"><span class="titlemark">5.7.7.1   </span> <a 
- id="x1-2930001"></a>Doorbell Numbering</h5>
-<!--l. 5977--><p class="nopar" >Doorbells are laid out as follows:
     <dl class="description"><dt class="description">
 <span 
 class="aebx-10">0</span> </dt><dd 
@@ -15028,7 +15024,7 @@ class="description">Log</dd></dl>
  id="x1-293001r295"></a>
 <h5 class="subsubsectionHead"><span class="titlemark">5.7.7.2   </span> <a 
  id="x1-2940002"></a>Notifications</h5>
-<!--l. 5989--><p class="nopar" >Notifications are laid out as follows:
+<!--l. 5992--><p class="nopar" >Notifications are laid out as follows:
     <dl class="description"><dt class="description">
 <span 
 class="aebx-10">0</span> </dt><dd 
@@ -15045,7 +15041,7 @@ class="description">Vring kick for vhost-user queue N-1</dd></dl>
  id="x1-294001r296"></a>
 <h5 class="subsubsectionHead"><span class="titlemark">5.7.7.3   </span> <a 
  id="x1-2950003"></a>Shared Memory Layout</h5>
-<!--l. 5999--><p class="nopar" >Shared memory is laid out as follows:
+<!--l. 6002--><p class="nopar" >Shared memory is laid out as follows:
     <dl class="description"><dt class="description">
 <span 
 class="aebx-10">0</span> </dt><dd 
@@ -15063,18 +15059,18 @@ class="description">
 class="aebx-10">SIZE0 + SIZE1 + </span><span 
 class="aebx-10">…</span> </dt><dd 
 class="description">Log</dd></dl>
-<!--l. 6008--><p class="noindent" >The size of vhost memory region 0 is <span 
+<!--l. 6011--><p class="noindent" >The size of vhost memory region 0 is <span 
 class="aeti-10">SIZE0</span>, the size of vhost memory region 1 is
 <span 
 class="aeti-10">SIZE1</span>, and so on.
 <a 
  id="x1-295001r297"></a>
+<h5 class="subsubsectionHead"><span class="titlemark">5.7.7.4   </span> <a 
+ id="x1-2960004"></a>Availability of Additional Resources</h5>
+<!--l. 6016--><p class="nopar" >The following vhost-user protocol messages convey access to additional device
                                                                   
 
                                                                   
-<h5 class="subsubsectionHead"><span class="titlemark">5.7.7.4   </span> <a 
- id="x1-2960004"></a>Availability of Additional Resources</h5>
-<!--l. 6013--><p class="nopar" >The following vhost-user protocol messages convey access to additional device
 resources:
     <dl class="description"><dt class="description">
 <span 
@@ -15114,12 +15110,12 @@ class="description">The vring err doorbell for this queue is
 <span 
 class="aebx-10">VHOST_USER_SET_SLAVE_REQ_FD</span> </dt><dd 
 class="description">The  driver  may  send  vhost-user
-    protocol slave messages on s2mtxq. Buffers put onto s2mtxq before this
-    message is received are discarded by the device.</dd></dl>
-<!--l. 6026--><p class="noindent" >Additional resources are configured on the virtio PCI transport by the following
+    protocol slave messages on txq. Buffers put onto txq before this message is
+    received are discarded by the device.</dd></dl>
+<!--l. 6029--><p class="noindent" >Additional resources are configured on the virtio PCI transport by the following
 <span 
 class="aeti-10">struct virtio_pci_cap.cfg_type </span>values:
-<!--l. 6028-->
+<!--l. 6031-->
 <div class="lstlisting" id="listing-64"><span class="label"><a 
  id="x1-296001r1"></a></span><span 
 class="pcrr8t-x-x-80">#</span><span 
@@ -15149,13 +15145,13 @@ class="pcrr8t-x-x-80">8</span>
  id="x1-296004r298"></a>
 <h5 class="subsubsectionHead"><span class="titlemark">5.7.7.5   </span> <a 
  id="x1-2970005"></a>Doorbell structure layout</h5>
-<!--l. 6036--><p class="nopar" >The doorbell location is found using the VIRTIO_PCI_CAP_DOORBELL_CFG
+<!--l. 6039--><p class="nopar" >The doorbell location is found using the VIRTIO_PCI_CAP_DOORBELL_CFG
+capability. This capability is immediately followed by an additional field, like
+so:
                                                                   
 
                                                                   
-capability. This capability is immediately followed by an additional field, like
-so:
-<!--l. 6040-->
+<!--l. 6043-->
 <div class="lstlisting" id="listing-65"><span class="label"><a 
  id="x1-297001r1"></a></span><span 
 class="pcrr8t-x-x-80">struct</span><span 
@@ -15197,8 +15193,8 @@ class="pcrr8t-x-x-80"> </span><br /><span class="label"><a
  id="x1-297004r4"></a></span><span 
 class="pcrr8t-x-x-80">};</span>
 </div>
-<!--l. 6047--><p class="noindent" >The doorbell address within a BAR is calculated as follows:
-<!--l. 6049-->
+<!--l. 6050--><p class="noindent" >The doorbell address within a BAR is calculated as follows:
+<!--l. 6052-->
 <div class="lstlisting" id="listing-66"><span class="label"><a 
  id="x1-297005r1"></a></span><span 
 class="pcrr8t-x-x-80"> </span><span 
@@ -15221,7 +15217,7 @@ class="pcrr8t-x-x-80">*</span><span
 class="pcrr8t-x-x-80"> </span><span 
 class="pcrr8t-x-x-80">doorbell_off_multiplier</span>
 </div>
-<!--l. 6053--><p class="noindent" >The <span 
+<!--l. 6056--><p class="noindent" >The <span 
 class="aeti-10">cap.offset </span>and <span 
 class="aeti-10">doorbell_off_multiplier </span>are taken from the notification capability
 structure above, and the <span 
@@ -15231,18 +15227,18 @@ class="aeti-10">doorbell_idx </span>is the doorbell number.
 <h5 class="paragraphHead"><span class="titlemark">5.7.7.5.1</span> <a 
  id="x1-2980001"></a>Device Requirements: Doorbell capability</h5>
 The device MUST present at least one doorbell capability.
-<!--l. 6060--><p class="noindent" >The <span 
+<!--l. 6063--><p class="noindent" >The <span 
 class="aeti-10">cap.offset </span>MUST be 2-byte aligned.
-<!--l. 6062--><p class="noindent" >The device MUST either present <span 
+<!--l. 6065--><p class="noindent" >The device MUST either present <span 
 class="aeti-10">doorbell_off_multiplier </span>as an even power of 2, or
 present <span 
 class="aeti-10">doorbell_off_multiplier </span>as 0.
-<!--l. 6065--><p class="noindent" >The value <span 
+<!--l. 6068--><p class="noindent" >The value <span 
 class="aeti-10">cap.length </span>presented by the device MUST be at least 2 and MUST be large
 enough to support doorbell offsets for all supported doorbells in all possible
 configurations.
-<!--l. 6069--><p class="noindent" >The value <span 
-class="aeti-10">cap.length </span>presented by the device MUST satisfy: <!--l. 6070-->
+<!--l. 6072--><p class="noindent" >The value <span 
+class="aeti-10">cap.length </span>presented by the device MUST satisfy: <!--l. 6073-->
 <div class="lstlisting" id="listing-67"><span class="label"><a 
  id="x1-298001r1"></a></span><span 
 class="pcrr8t-x-x-80">cap</span><span 
@@ -15261,21 +15257,21 @@ class="pcrr8t-x-x-80">+</span><span
 class="pcrr8t-x-x-80"> </span><span 
 class="pcrr8t-x-x-80">2</span>
 </div>
-<!--l. 6074--><p class="noindent" >The number of doorbells is <span 
+<!--l. 6077--><p class="noindent" >The number of doorbells is <span 
 class="aeti-10">num_doorbells </span>and is dependent on the device.
 <a 
  id="x1-298002r299"></a>
 <h5 class="subsubsectionHead"><span class="titlemark">5.7.7.6   </span> <a 
  id="x1-2990006"></a>Notification structure layout</h5>
-<!--l. 6079--><p class="nopar" >The notification structure allows MSI-X vectors to be configured for notification
+<!--l. 6082--><p class="nopar" >The notification structure allows MSI-X vectors to be configured for notification
 interrupts. If MSI-X is not available, bit 2 of the ISR status indicates that a
 notification occurred.
-<!--l. 6083--><p class="noindent" >The notification structure is found using the VIRTIO_PCI_CAP_DOORBELL_CFG
+<!--l. 6086--><p class="noindent" >The notification structure is found using the VIRTIO_PCI_CAP_DOORBELL_CFG
 capability.
+<!--l. 6089-->
                                                                   
 
                                                                   
-<!--l. 6086-->
 <div class="lstlisting" id="listing-68"><span class="label"><a 
  id="x1-299001r1"></a></span><span 
 class="pcrr8t-x-x-80">struct</span><span 
@@ -15352,7 +15348,7 @@ class="pcrr8t-x-x-80"> </span><br /><span class="label"><a
  id="x1-299004r4"></a></span><span 
 class="pcrr8t-x-x-80">};</span>
 </div>
-<!--l. 6093--><p class="noindent" >The driver indicates which notification is of interest by writing the <span 
+<!--l. 6096--><p class="noindent" >The driver indicates which notification is of interest by writing the <span 
 class="aeti-10">notification_select</span>
 field. The driver then writes the MSI-X vector or <span 
 class="aeti-10">VIRTIO_MSI_NO_VECTOR </span>to
@@ -15362,24 +15358,24 @@ class="aeti-10">notification_msix_vector </span>to change the MSI-X vector for t
  id="x1-299005r301"></a>
 <h5 class="subsubsectionHead"><span class="titlemark">5.7.7.7   </span> <a 
  id="x1-3000007"></a>Shared memory capability</h5>
-<!--l. 6100--><p class="nopar" >The shared memory location is found using the VIRTIO_PCI_CAP_SHARED_MEMORY_CFG
+<!--l. 6103--><p class="nopar" >The shared memory location is found using the VIRTIO_PCI_CAP_SHARED_MEMORY_CFG
 capability.
 <a 
  id="x1-300001r300"></a>
 <h5 class="paragraphHead"><span class="titlemark">5.7.7.7.1</span> <a 
  id="x1-3010001"></a>Device Requirements: Shared Memory capability</h5>
 The device MUST present exactly one shared memory capability.
-<!--l. 6106--><p class="noindent" >The device MUST locate shared memory in a Memory Space BAR.
-<!--l. 6108--><p class="noindent" >The device SHOULD locate shared memory in a Prefetchable BAR.
-<!--l. 6110--><p class="noindent" >The <span 
+<!--l. 6109--><p class="noindent" >The device MUST locate shared memory in a Memory Space BAR.
+<!--l. 6111--><p class="noindent" >The device SHOULD locate shared memory in a Prefetchable BAR.
+<!--l. 6113--><p class="noindent" >The <span 
 class="aeti-10">cap.offset </span>MUST be 4096-byte aligned.
-<!--l. 6112--><p class="noindent" >The value <span 
+<!--l. 6115--><p class="noindent" >The value <span 
 class="aeti-10">cap.length </span>presented by the device MUST be non-zero and 4096-byte
 aligned.
                                                                   
 
                                                                   
-<!--l. 6114--><p class="nopar" ><h2 class="chapterHead"><hr><span class="titlemark">6</span> <a 
+<!--l. 6117--><p class="nopar" ><h2 class="chapterHead"><hr><span class="titlemark">6</span> <a 
  id="x1-3020006"></a>Reserved Feature Bits</h2>
 Currently these device-independent feature bits defined:
     <dl class="description"><dt class="description">
@@ -15418,9 +15414,9 @@ class="description">This  feature  indicates  that  the
  id="x1-302001r285"></a>
 <h3 class="sectionHead"><span class="titlemark">6.1   </span> <a 
  id="x1-3030001"></a>Driver Requirements: Reserved Feature Bits</h3>
-<!--l. 6138--><p class="nopar" >A driver MUST accept VIRTIO_F_VERSION_1 if it is offered. A driver MAY fail to
+<!--l. 6141--><p class="nopar" >A driver MUST accept VIRTIO_F_VERSION_1 if it is offered. A driver MAY fail to
 operate further if VIRTIO_F_VERSION_1 is not offered.
-<!--l. 6141--><p class="noindent" >A driver SHOULD accept VIRTIO_F_IOMMU_PLATFORM if it is offered, and it
+<!--l. 6144--><p class="noindent" >A driver SHOULD accept VIRTIO_F_IOMMU_PLATFORM if it is offered, and it
 MUST then either disable the IOMMU or configure the IOMMU to translate
 bus addresses passed to the device into physical addresses in memory. If
 VIRTIO_F_IOMMU_PLATFORM is not offered, then a driver MUST pass only
@@ -15429,9 +15425,9 @@ physical addresses to the device.
  id="x1-303001r305"></a>
 <h3 class="sectionHead"><span class="titlemark">6.2   </span> <a 
  id="x1-3040002"></a>Device Requirements: Reserved Feature Bits</h3>
-<!--l. 6149--><p class="nopar" >A device MUST offer VIRTIO_F_VERSION_1. A device MAY fail to operate further
+<!--l. 6152--><p class="nopar" >A device MUST offer VIRTIO_F_VERSION_1. A device MAY fail to operate further
 if VIRTIO_F_VERSION_1 is not accepted.
-<!--l. 6152--><p class="noindent" >A device SHOULD offer VIRTIO_F_IOMMU_PLATFORM if it is behind an IOMMU
+<!--l. 6155--><p class="noindent" >A device SHOULD offer VIRTIO_F_IOMMU_PLATFORM if it is behind an IOMMU
 that translates bus addresses from the device into physical addresses in memory. A
 device MAY fail to operate further if VIRTIO_F_IOMMU_PLATFORM is not
 accepted.
@@ -15442,7 +15438,7 @@ accepted.
                                                                   
 <h3 class="sectionHead"><span class="titlemark">6.3   </span> <a 
  id="x1-3050003"></a>Legacy Interface: Reserved Feature Bits</h3>
-<!--l. 6159--><p class="nopar" >Transitional devices MAY offer the following:
+<!--l. 6162--><p class="nopar" >Transitional devices MAY offer the following:
     <dl class="description"><dt class="description">
 <span 
 class="aebx-10">VIRTIO_F_NOTIFY_ON_EMPTY (24)</span> </dt><dd 
@@ -15459,7 +15455,7 @@ class="aebx-10">Note:</span> An example of a driver using this feature is the le
           they  are  transmitted.  It  can  avoid  using  a  timer  if  the  device
           interrupts it when all the packets are transmitted.
     </dd></dl>
-<!--l. 6177--><p class="noindent" >Transitional devices MUST offer, and if offered by the device transitional drivers
+<!--l. 6180--><p class="noindent" >Transitional devices MUST offer, and if offered by the device transitional drivers
 MUST accept the following:
     <dl class="description"><dt class="description">
 <span 
