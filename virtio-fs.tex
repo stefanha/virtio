@@ -1,0 +1,208 @@
+\section{File System Device}\label{sec:Device Types / File System Device}
+
+The virtio file system device provides file system access.  The device may
+directly manage a file system or act as a gateway to a remote file system.  The
+details of how files are accessed are hidden by the device interface, allowing
+for a range of use cases.
+
+Unlike block-level storage devices such as virtio block and SCSI, the virtio
+file system device provides file-level access to data.  The device interface
+therefore contains the following file system concepts:
+\begin{itemize}
+\item Regular files are named objects that contain data.  They can be resized
+      and auxiliary data can be stored in so-called extended attributes.
+\item Directories are containers for files and sub-directories.
+\item Symbolic links store a path which is traversed to resolve the link.
+\item Device nodes are special files whose behavior is determined by device
+      drivers.
+\end{itemize}
+
+The device interface is based on the Linux Filesystem in Userspace (FUSE)
+interface.  This consists of file system requests that traverse the file system
+and access the files and directories within it.  The request structure is
+defined by \hyperref[intro:FUSE]{FUSE}.  The virtio file system device acts as
+a transport for FUSE requests and is analogous to the /dev/fuse device.
+
+TODO table explaining how FUSE concepts are mapped.  "The virtio device has the role of the FUSE daemon."
+
+The request types are as follows:
+\begin{itemize}
+\item Normal requests are submitted by the driver and completed by the device.
+\item Interrupt requests are submitted by the driver to abort requests that the
+      device may have yet to complete.
+\item Notifications are submitted by the device and completed by the driver.
+\end{itemize}
+
+This section relies on definitions from \hyperref[intro:FUSE]{FUSE}.
+
+\subsection{Device ID}\label{sec:Device Types / File System Device / Device ID}
+  26
+
+\subsection{Virtqueues}\label{sec:Device Types / File System Device / Virtqueues}
+
+\begin{description}
+\item[0] notifications
+\item[1] hiprio
+\item[2\ldots n] request queues
+\end{description}
+
+\subsection{Feature bits}\label{sec:Device Types / File System Device / Feature bits}
+
+There are currently no feature bits defined.
+
+\subsection{Device configuration layout}\label{sec:Device Types / File System Device / Device configuration layout}
+
+All fields of this configuration are always available.
+
+\begin{lstlisting}
+struct virtio_fs_config {
+        char tag[36];
+        le32 num_queues;
+};
+\end{lstlisting}
+
+\begin{description}
+\item[\field{tag}] is the name associated with this file system.  The tag is
+    encoded in UTF-8 and padded with NUL bytes if shorter than the
+    available space.  This field is not NUL-terminated if the encoded bytes
+    take up the entire field.
+\item[\field{num_queues}] is the total number of request virtqueues exposed by
+    the device. The driver MAY use only one request queue,
+    or it can use more to achieve better performance.
+\end{description}
+
+\drivernormative{\subsubsection}{Device configuration layout}{Device Types / File System Device / Device configuration layout}
+
+The driver MUST NOT write to device configuration fields.
+
+\devicenormative{\subsubsection}{Device configuration layout}{Device Types / File System Device / Device configuration layout}
+
+\devicenormative{\subsection}{Device Initialization}{Device Types / File System Device / Device Initialization}
+
+On initialization the driver MUST first discover the
+device's virtqueues.
+
+If the driver uses the notifications queue, the driver SHOULD place at least
+one buffer in the notifications queue.
+
+TODO how is the notifications buffer size determined?
+
+\subsection{Device Operation}\label{sec:Device Types / File System Device / Device Operation}
+
+Device operation consists of operating the virtqueues to facilitate file system
+access.
+
+\subsubsection{Device Operation: Request Queues}\label{sec:Device Types / File System Device / Device Operation / Device Operation: Request Queues}
+
+The driver enqueues requests on an arbitrary request queue, and
+they are used by the device on that same queue. It is the
+responsibility of the driver to ensure strict request ordering
+for commands placed on different queues, because they will be
+consumed with no order constraints.
+
+Requests have the following format:
+
+\begin{lstlisting}
+struct virtio_fs_req {
+        // Device-readable part
+        struct fuse_in_header in;
+        u8 datain[];
+
+        // Device-writable part
+        struct fuse_out_header out;
+        u8 dataout[];
+};
+\end{lstlisting}
+
+Note that the words "in" and "out" follow the FUSE meaning and do not indicate
+the direction of data transfer under VIRTIO.  "In" means input to a request and
+"out" means output from processing a request.
+
+\field{in} is the common header for all types of FUSE requests.
+
+\field{datain} consists of request-specific data, if any.  This is identical to
+the data read from the /dev/fuse device by a FUSE daemon.
+
+\field{out} is the completion header common to all types of FUSE requests.
+
+\field{dataout} consists of request-specific data, if any.  This is identical
+to the data written to the /dev/fuse device by a FUSE daemon.
+
+For example, the full layout of a FUSE_READ request is as follows:
+
+\begin{lstlisting}
+struct virtio_fs_read_req {
+        // Device-readable part
+        struct fuse_in_header in;
+        union {
+                struct fuse_read_in readin;
+                u8 datain[sizeof(struct fuse_read_in)];
+        };
+
+        // Device-writable part
+        struct fuse_out_header out;
+        u8 dataout[out.len - sizeof(struct fuse_out_header)];
+};
+\end{lstlisting}
+
+\devicenormative{\paragraph}{Device Operation: Request Queues}{Device Types / File System Device / Device Operation / Device Operation: Request Queues}
+
+\drivernormative{\paragraph}{Device Operation: Request Queues}{Device Types / File System Device / Device Operation / Device Operation: Request Queues}
+
+\subsubsection{Device Operation: High Priority Queue}\label{sec:Device Types / File System Device / Device Operation / Device Operation: High Priority Queue}
+
+The hiprio queue follows the same request format as the requests queue.  This
+queue only contains FUSE_INTERRUPT, FUSE_FORGET, and FUSE_BATCH_FORGET
+requests.
+
+Interrupt and forget requests have a higher priority than normal requests.  In
+order to ensure that they can always be delivered, even if all request queues
+are full, a separate queue is used.
+
+\devicenormative{\paragraph}{Device Operation: High Priority Queue}{Device Types / File System Device / Device Operation / Device Operation: High Priority Queue}
+
+The device SHOULD attempt to process the hiprio queue promptly.
+
+The device MAY process request queues concurrently with the hiprio queue.
+
+\drivernormative{\paragraph}{Device Operation: High Priority Queue}{Device Types / File System Device / Device Operation / Device Operation: High Priority Queue}
+
+The driver MUST submit FUSE_INTERRUPT, FUSE_FORGET, and FUSE_BATCH_FORGET requests solely on the hiprio queue.
+
+The driver MUST anticipate that request queues are processed concurrently with the hiprio queue.
+
+\subsubsection{Device Operation: Notifications Queue}\label{sec:Device Types / File System Device / Device Operation / Device Operation: Notifications Queue}
+
+The notifications queue is used for notification requests from the device to
+the driver.  The request queues cannot be used since they only work in the
+direction of the driver to the device.
+
+Notifications are different from normal requests because they only contain
+device writable fields.  The driver sends notification replies on one of the
+request queues.  The format of notification requests is as follows:
+
+\begin{lstlisting}
+struct virtio_fs_notification_req {
+        // Device-writable part
+        struct fuse_out_header out;
+        u8 dataout[];
+};
+\end{lstlisting}
+
+\field{out} is the completion header common to all types of FUSE requests.  The
+\field{out.unique} field is 0 and the \field{out.error} field contains a
+FUSE_NOTIFY_* code.
+
+\field{dataout} consists of request-specific data, if any.  This is identical
+to the data written to the /dev/fuse device by a FUSE daemon.
+
+\devicenormative{\paragraph}{Device Operation: Notifications Queue}{Device Types / File System Device / Device Operation / Device Operation: Notifications Queue}
+
+The device MUST set \field{out.unique} to 0 and set \field{out.error} to a FUSE_NOTIFY_* code.
+
+\drivernormative{\paragraph}{Device Operation: Notifications Queue}{Device Types / File System Device / Device Operation / Device Operation: Notifications Queue}
+
+The driver MUST verify that \field{out.unique} is 0.
+
+TODO how to size buffers?
+
